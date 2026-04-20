@@ -14,6 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.esamept12026.ui.theme.EsamePT12026Theme
 
 class MainActivity : ComponentActivity() {
+    //TEST
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
