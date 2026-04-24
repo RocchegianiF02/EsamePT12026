@@ -2,6 +2,10 @@ package com.esamept12026.data
 
 import androidx.compose.ui.graphics.Color
 
+/*
+     Oggetto
+*/
+
 const val RED_BUTTON = "R"
 const val GREEN_BUTTON = "G"
 const val BLUE_BUTTON = "B"

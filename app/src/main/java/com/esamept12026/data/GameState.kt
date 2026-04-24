@@ -1,5 +1,9 @@
 package com.esamept12026.data
 
+/*
+    Classe contenente gli stati utilizzati all'interno dell'applicazione e alcuni campi condivisi come ad esempio la sequenza di input inseriti
+    da parte dell'utente durante la partita (userInput).
+*/
 data class GameState(
     val sequence: List<String> = emptyList(),
     val userInput: List<String> = emptyList(),

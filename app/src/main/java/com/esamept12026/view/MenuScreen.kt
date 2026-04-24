@@ -17,6 +17,9 @@ import androidx.navigation.NavController
 
 import com.esamept12026.R
 
+/*
+    Bottoni all'interno del menù principale che permettono lo spostamento tramite il NavController nelle 2 schermate principali dell'applicazione.
+*/
 @Composable
 fun MenuButtons(navController: NavController, modifier: Modifier) {
     Button(
@@ -37,6 +40,10 @@ fun MenuButtons(navController: NavController, modifier: Modifier) {
     }
 }
 
+/*
+    Menù principale dell'applicazione, aggiunto per permettere all'utente di spostarsi liberamente fra "Schermata 1" (GameScreen.kt) e "Schermata 2" (ResultsScreen.kt)
+    senza essere vincolato necessariamente alla partita.
+*/
 @Composable
 fun MenuScreen(navController: NavController) {
     Column(
