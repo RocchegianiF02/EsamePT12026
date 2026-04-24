@@ -20,7 +20,7 @@ import com.esamept12026.data.GameState
 
 import com.esamept12026.viewmodel.GameViewModel
 
-//Navigazione Game Over
+//Componente che gestisce la navigazione verso la "Schermata 2".
 @Composable
 fun GameNavigateToResults(vm : GameViewModel, navController: NavController) {
     val state by vm.state.collectAsState()
@@ -32,7 +32,7 @@ fun GameNavigateToResults(vm : GameViewModel, navController: NavController) {
     }
 }
 
-//Countdown
+//Componente che mette in funzione il countdown prima dell'avvio della partita.
 @Composable
 fun GameCountdown(vm : GameViewModel) {
     val state by vm.state.collectAsState()
@@ -43,7 +43,7 @@ fun GameCountdown(vm : GameViewModel) {
     }
 }
 
-//Sequenza
+//Componente che gestisce l'esecuzione della sequenza randomica che l'utente dovrà ripetere.
 @Composable
 fun GameSequence(vm : GameViewModel) {
     val state by vm.state.collectAsState()
@@ -52,6 +52,7 @@ fun GameSequence(vm : GameViewModel) {
     }
 }
 
+//Componente che implementa la schermata di gioco in modalità "landscape".
 @Composable
 fun GameScreenLandscape(
     vm: GameViewModel = viewModel(),
@@ -88,6 +89,7 @@ fun GameScreenLandscape(
     }
 }
 
+//Componente che implementa la schermata di gioco in modalità "portrait".
 @Composable
 fun GameScreenPortrait(
     vm: GameViewModel,
@@ -111,6 +113,7 @@ fun GameScreenPortrait(
     }
 }
 
+//Componente che implementa l'area di testo che mostra la sequenza inserita e il numero di "reset" della sequenza inserita dall'utente all'interno della schermata di gioco.
 @Composable
 fun GameTextArea(state : GameState) {
     Text(
@@ -123,6 +126,7 @@ fun GameTextArea(state : GameState) {
     )
 }
 
+//Componente che implementa i bottoni inseriti all'interno della "Schermata 1".
 @Composable
 fun GameActionButtons(vm: GameViewModel, navController: NavController) {
     Row(Modifier.padding(16.dp)) {
@@ -144,6 +148,7 @@ fun GameActionButtons(vm: GameViewModel, navController: NavController) {
     }
 }
 
+//Componente che implementa il countdown prima dell'avvio della partita.
 @Composable
 fun GameScreenCountdown(vm: GameViewModel) {
     val state by vm.state.collectAsState()
@@ -157,6 +162,7 @@ fun GameScreenCountdown(vm: GameViewModel) {
     }
 }
 
+//Componente che implementa la finestra di dialogo per abbandonare la partita corrente e tornare al menù principale.
 @Composable
 fun GameScreenExitDialog(vm: GameViewModel, navController: NavController) {
     AlertDialog(
@@ -179,6 +185,7 @@ fun GameScreenExitDialog(vm: GameViewModel, navController: NavController) {
     )
 }
 
+//Componente che implementa l'intera "Schermata 1".
 @Composable
 fun GameScreen(
     navController: NavController,
@@ -199,10 +206,10 @@ fun GameScreen(
 
     Box(Modifier.fillMaxSize()) {
         if (isLandscape) {
-            //Modalità landscape
+            //Modalità landscape.
             GameScreenLandscape(vm,navController)
         } else {
-            //Modalità portrait
+            //Modalità portrait.
             GameScreenPortrait(vm,navController)
         }
 
@@ -210,7 +217,7 @@ fun GameScreen(
             GameScreenCountdown(vm)
         }
 
-        //Quando l'utente clicca sul rettangolo colorato sbagliato
+        //Quando l'utente clicca sul rettangolo colorato sbagliato viene mostrata una schermata rossa a segnalare l'errore.
         if (state.error) {
             Box(
                 Modifier
@@ -219,7 +226,7 @@ fun GameScreen(
             )
         }
 
-        //Alert di uscita dalla partita
+        //Finestra di dialogo di uscita dalla partita.
         if (state.showExitDialog) {
             GameScreenExitDialog(vm,navController)
         }

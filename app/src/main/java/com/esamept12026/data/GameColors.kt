@@ -3,7 +3,7 @@ package com.esamept12026.data
 import androidx.compose.ui.graphics.Color
 
 /*
-     Oggetto
+     Oggetto contenente la lista con le associazioni codice - colore
 */
 
 const val RED_BUTTON = "R"

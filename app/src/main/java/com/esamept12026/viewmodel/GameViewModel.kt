@@ -13,7 +13,7 @@ import com.esamept12026.data.GameRepository
 import com.esamept12026.data.GameState
 import com.esamept12026.model.GameResult
 
-//Questa classe sarà responsabile della preparazione e la gestione dei dati dentro ai component (in quanto ViewModel)
+//Questa classe sarà responsabile della preparazione e la gestione dei dati dentro ai componenti dell'applicazione (in quanto ViewModel).
 class GameViewModel : ViewModel() {
 
     val state = MutableStateFlow(GameState())
@@ -45,14 +45,6 @@ class GameViewModel : ViewModel() {
                 isCountingDown = false
             )}
         }
-    }
-
-    fun markSequenceShown() {
-        state.update { it.copy(hasShownSequence = true) }
-    }
-
-    fun setShowing(v: Boolean) {
-        state.update { it.copy(showing = v) }
     }
 
     fun startNavigation() {
@@ -102,10 +94,10 @@ class GameViewModel : ViewModel() {
     fun onUserClick(color: String) {
         val s = state.value
 
-        //Previene click accidentali da parte dell'utente durante le fasi critiche all'interno della nostra applicazione
+        //Previene click accidentali da parte dell'utente durante le fasi critiche all'interno della nostra applicazione.
         if (s.locked || s.showing || s.countdownActive || s.navigating) return
 
-        //Previene l'assegnazione del valore che dovrebbe essere confrontato in caso di valori NULL
+        //Previene l'assegnazione del valore che dovrebbe essere confrontato in caso di valori NULL.
         val expected = s.sequence.getOrNull(s.userIndex) ?: return
 
         if (color == expected) {
@@ -148,7 +140,7 @@ class GameViewModel : ViewModel() {
             val s = state.value
             GameRepository.games.add(GameResult(s.userInput, s.clears))
 
-            //Impedisce il countdown dopo un "Game Over"
+            //Impedisce il countdown dopo un "Game Over".
             startGame(withCountdown = false)
         }
     }

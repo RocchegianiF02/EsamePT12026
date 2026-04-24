@@ -16,8 +16,12 @@ import androidx.compose.ui.unit.dp
 import com.esamept12026.data.GameColors
 
 const val ROW_LENGTH = 3
+
 const val COL_LENGTH = 2
 
+/*
+     Componente che implementa il layout della griglia dei bottoni all'interno della schermata di gioco ("Schermata 1").
+*/
 @Composable
 fun ColorGrid(
     highlighted: String?,

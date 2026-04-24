@@ -21,9 +21,9 @@ import com.esamept12026.R
 import com.esamept12026.data.GameRepository
 import com.esamept12026.model.GameResult
 
+//Componente che implementa la "header" della "tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati.
 @Composable
 fun ResultsHeader(modifier: Modifier) {
-    //"Header" della "Tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati
     Row(
         modifier = modifier
     ) {
@@ -42,9 +42,9 @@ fun ResultsHeader(modifier: Modifier) {
     }
 }
 
+//Componente che implementa il "corpo" della "tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati.
 @Composable
 fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
-    //"Corpo" della "Tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati
     LazyColumn( modifier = modifier ) {
         items(games) { g ->
             val sequenceText = g.sequence.joinToString(", ")
@@ -87,6 +87,7 @@ fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
     }
 }
 
+//Componente che implementa i bottoni della "Schermata 2" e le relative funzionalità.
 @Composable
 fun ResultsButtons(onClickShowDialog : (Boolean) -> Unit, navController : NavController, modifier: Modifier) {
     Button(
@@ -108,6 +109,7 @@ fun ResultsButtons(onClickShowDialog : (Boolean) -> Unit, navController : NavCon
     }
 }
 
+//Componente che implementa il riquadro che indica al giocatore che non sono ancora state avviate partite nella sessione corrente.
 @Composable
 fun ResultsNoGamesBox(modifier: Modifier) {
     Box(
@@ -121,6 +123,7 @@ fun ResultsNoGamesBox(modifier: Modifier) {
     }
 }
 
+//Componente che implementa la finestra di dialogo che permette di iniziare una nuova partita.
 @Composable
 fun ResultsDialog(onClickShowDialog : (Boolean) -> Unit, navController: NavController) {
     AlertDialog(
@@ -144,13 +147,14 @@ fun ResultsDialog(onClickShowDialog : (Boolean) -> Unit, navController: NavContr
     )
 }
 
+//Componente che implementa l'intera "Schermata 2".
 @Composable
 fun ResultsScreen(navController: NavController) {
 
     val games = GameRepository.games
     var showDialog by remember { mutableStateOf(false) }
 
-    //Permette di invocare questo blocco quando "premo" il tasto "indietro" del dispositivo
+    //Permette di invocare la finestra di dialogo quando "premo" il tasto "indietro" del dispositivo.
     BackHandler {
         showDialog = true
     }
@@ -191,7 +195,7 @@ fun ResultsScreen(navController: NavController) {
         }
     }
 
-    //Alert che ci chiede di iniziare una nuova partita
+    //Finestra di dialogo che ci chiede la conferma di iniziare una nuova partita.
     if (showDialog) {
         ResultsDialog(
             onClickShowDialog = { newValue -> showDialog = newValue },
