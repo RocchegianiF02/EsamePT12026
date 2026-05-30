@@ -8,7 +8,10 @@ data class GameState(
     val sequence: List<String> = emptyList(),
     val userInput: List<String> = emptyList(),
     val userIndex: Int = 0,
-    val clears: Int = 0,
+    //val clears: Int = 0,
+
+    val gameStarted: Boolean = false,
+    val gameOver: Boolean = false,
 
     val locked: Boolean = false,
     val showing: Boolean = false,
