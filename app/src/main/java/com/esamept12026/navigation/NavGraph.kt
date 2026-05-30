@@ -15,12 +15,15 @@ import com.esamept12026.view.ResultsScreen
 fun NavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        startDestination = "menu"
+        //startDestination = "menu"
+        startDestination = "results"
     ) {
+        /*
         //Menù Principale
         composable("menu") {
             MenuScreen(navController)
         }
+        */
 
         //Schermata di Gioco
         composable("game") {
