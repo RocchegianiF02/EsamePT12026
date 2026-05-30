@@ -26,11 +26,12 @@ class GameViewModel : ViewModel() {
     fun startGame(withCountdown: Boolean = true) {
         state.value = GameState(
             sequence = listOf(colors.random().code),
-            countdown = 4,
-            countdownActive = withCountdown
+            //countdown = 4,
+            //countdownActive = withCountdown
         )
     }
 
+    /*
     fun startCountdown() {
         if (state.value.isCountingDown) return
 
@@ -46,6 +47,7 @@ class GameViewModel : ViewModel() {
             )}
         }
     }
+    */
 
     fun startNavigation() {
         state.update { it.copy(navigating = true) }
@@ -68,8 +70,9 @@ class GameViewModel : ViewModel() {
             val current = state.value
 
             if (current.sequence.isEmpty() ||
-                current.hasShownSequence ||
-                current.countdownActive
+                current.hasShownSequence
+                //current.hasShownSequence ||
+                //current.countdownActive
             ) return@launch
 
             state.update { it.copy(showing = true) }
@@ -95,7 +98,8 @@ class GameViewModel : ViewModel() {
         val s = state.value
 
         //Previene click accidentali da parte dell'utente durante le fasi critiche all'interno della nostra applicazione.
-        if (s.locked || s.showing || s.countdownActive || s.navigating) return
+        //if (s.locked || s.showing || s.countdownActive || s.navigating) return
+        if (s.locked || s.showing || s.navigating) return
 
         //Previene l'assegnazione del valore che dovrebbe essere confrontato in caso di valori NULL.
         val expected = s.sequence.getOrNull(s.userIndex) ?: return
@@ -149,7 +153,8 @@ class GameViewModel : ViewModel() {
         val s = state.value
 
         //Previene errori di reset non voluti nelle sezioni critiche del codice
-        if (s.locked || s.showing || s.countdownActive || s.navigating) return
+        //if (s.locked || s.showing || s.countdownActive || s.navigating) return
+        if (s.locked || s.showing || s.navigating) return
 
         state.update {
             it.copy(
@@ -164,7 +169,8 @@ class GameViewModel : ViewModel() {
         val s = state.value
 
         //Previene errori di reset non voluti nelle sezioni critiche del codice
-        if (s.locked || s.showing || s.countdownActive || s.navigating) return
+        //if (s.locked || s.showing || s.countdownActive || s.navigating) return
+        if (s.locked || s.showing || s.navigating) return
 
         state.update { it.copy(navigating = true) }
 

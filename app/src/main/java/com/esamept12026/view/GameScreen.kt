@@ -32,22 +32,25 @@ fun GameNavigateToResults(vm : GameViewModel, navController: NavController) {
     }
 }
 
+/*
 //Componente che mette in funzione il countdown prima dell'avvio della partita.
 @Composable
 fun GameCountdown(vm : GameViewModel) {
     val state by vm.state.collectAsState()
     LaunchedEffect(state.countdownActive) {
         if (state.countdownActive) {
-            vm.startCountdown()
+            //vm.startCountdown()
         }
     }
 }
+*/
 
 //Componente che gestisce l'esecuzione della sequenza randomica che l'utente dovrà ripetere.
 @Composable
 fun GameSequence(vm : GameViewModel) {
     val state by vm.state.collectAsState()
-    LaunchedEffect(state.sequence, state.hasShownSequence, state.countdownActive) {
+    //LaunchedEffect(state.sequence, state.hasShownSequence, state.countdownActive) {
+    LaunchedEffect(state.sequence, state.hasShownSequence) {
         vm.playSequence()
     }
 }
@@ -148,6 +151,7 @@ fun GameActionButtons(vm: GameViewModel, navController: NavController) {
     }
 }
 
+/*
 //Componente che implementa il countdown prima dell'avvio della partita.
 @Composable
 fun GameScreenCountdown(vm: GameViewModel) {
@@ -161,6 +165,7 @@ fun GameScreenCountdown(vm: GameViewModel) {
         Text("${state.countdown}", color = Color.White)
     }
 }
+*/
 
 //Componente che implementa la finestra di dialogo per abbandonare la partita corrente e tornare al menù principale.
 @Composable
@@ -197,7 +202,7 @@ fun GameScreen(
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
     GameNavigateToResults(vm,navController)
-    GameCountdown(vm)
+    //GameCountdown(vm)
     GameSequence(vm)
 
     BackHandler {
@@ -213,9 +218,11 @@ fun GameScreen(
             GameScreenPortrait(vm,navController)
         }
 
+        /*
         if (state.countdownActive) {
             GameScreenCountdown(vm)
         }
+        */
 
         //Quando l'utente clicca sul rettangolo colorato sbagliato viene mostrata una schermata rossa a segnalare l'errore.
         if (state.error) {

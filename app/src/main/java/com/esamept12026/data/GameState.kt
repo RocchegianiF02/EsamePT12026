@@ -16,9 +16,9 @@ data class GameState(
 
     val showExitDialog: Boolean = false,
 
-    val countdown: Int = 4,
-    val isCountingDown: Boolean = false,
-    val countdownActive: Boolean = true,
+    //val countdown: Int = 4,
+    //val isCountingDown: Boolean = false,
+    //val countdownActive: Boolean = true,
     val hasShownSequence: Boolean = false,
 
     val navigating: Boolean = false,
@@ -27,5 +27,6 @@ data class GameState(
     val highlighted: String? = null
 ){
     fun isInputEnabled(): Boolean =
-        !locked && !showing && !countdownActive && !navigating
+        //!locked && !showing && !countdownActive && !navigating
+        !locked && !showing && !navigating
 }
