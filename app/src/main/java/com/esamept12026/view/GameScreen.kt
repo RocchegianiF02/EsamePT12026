@@ -20,6 +20,7 @@ import com.esamept12026.data.GameState
 
 import com.esamept12026.viewmodel.GameViewModel
 
+/*
 //Componente che gestisce la navigazione verso la "Schermata 2".
 @Composable
 fun GameNavigateToResults(vm : GameViewModel, navController: NavController) {
@@ -31,6 +32,7 @@ fun GameNavigateToResults(vm : GameViewModel, navController: NavController) {
         navController.navigate("results")
     }
 }
+*/
 
 /*
 //Componente che mette in funzione il countdown prima dell'avvio della partita.
@@ -120,7 +122,7 @@ fun GameScreenPortrait(
 @Composable
 fun GameTextArea(state : GameState) {
     Text(
-        text = "${stringResource(R.string.score)}: ${state.sequence.size} || ${stringResource(R.string.clears)}: ${state.clears}\n${
+        text = "${stringResource(R.string.score)} : ${state.sequence.size}\n${
             state.userInput.joinToString(
                 ", "
             )
@@ -133,17 +135,24 @@ fun GameTextArea(state : GameState) {
 @Composable
 fun GameActionButtons(vm: GameViewModel, navController: NavController) {
     Row(Modifier.padding(16.dp)) {
+        /*
         Button(
             onClick = vm::clear,
             modifier = Modifier.weight(1f)
         ) { Text(stringResource(R.string.clear)) }
+        */
 
         Spacer(Modifier.width(8.dp))
 
         Button(
             onClick = {
                 vm.endGame {
-                    navController.navigate("results")
+                    //navController.navigate("results")
+                    navController.navigate("results") {
+                        popUpTo("game") {
+                            inclusive = true
+                        }
+                    }
                 }
             },
             modifier = Modifier.weight(1f)
@@ -167,6 +176,7 @@ fun GameScreenCountdown(vm: GameViewModel) {
 }
 */
 
+/*
 //Componente che implementa la finestra di dialogo per abbandonare la partita corrente e tornare al menù principale.
 @Composable
 fun GameScreenExitDialog(vm: GameViewModel, navController: NavController) {
@@ -177,9 +187,12 @@ fun GameScreenExitDialog(vm: GameViewModel, navController: NavController) {
             Button(onClick = {
                 vm.startNavigation()
                 vm.closeExitDialog()
+                /*
                 navController.navigate("menu") {
                     popUpTo("menu") { inclusive = true }
                 }
+                */
+                System.exit(0)
             }) { Text(stringResource(R.string.yes)) }
         },
         dismissButton = {
@@ -189,6 +202,7 @@ fun GameScreenExitDialog(vm: GameViewModel, navController: NavController) {
         }
     )
 }
+*/
 
 //Componente che implementa l'intera "Schermata 1".
 @Composable
@@ -201,12 +215,27 @@ fun GameScreen(
     val isLandscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    GameNavigateToResults(vm,navController)
+    //GameNavigateToResults(vm,navController)
     //GameCountdown(vm)
     GameSequence(vm)
 
     BackHandler {
-        vm.openExitDialog()
+        vm.onBackPressed(
+
+            navigateResults = {
+                navController.popBackStack()
+            }
+
+            /*
+            navigateResults = {
+                navController.navigate("results") {
+                    popUpTo("game") {
+                        inclusive = true
+                    }
+                }
+            }
+            */
+        )
     }
 
     Box(Modifier.fillMaxSize()) {
@@ -233,9 +262,11 @@ fun GameScreen(
             )
         }
 
+        /*
         //Finestra di dialogo di uscita dalla partita.
         if (state.showExitDialog) {
             GameScreenExitDialog(vm,navController)
         }
+        */
     }
 }

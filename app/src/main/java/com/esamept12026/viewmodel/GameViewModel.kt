@@ -142,13 +142,15 @@ class GameViewModel : ViewModel() {
             delay(300)
 
             val s = state.value
-            GameRepository.games.add(GameResult(s.userInput, s.clears))
+            //GameRepository.games.add(GameResult(s.userInput, s.clears))
+            GameRepository.games.add(GameResult(s.userInput))
 
             //Impedisce il countdown dopo un "Game Over".
             startGame(withCountdown = false)
         }
     }
 
+    /*
     fun clear() {
         val s = state.value
 
@@ -164,6 +166,7 @@ class GameViewModel : ViewModel() {
             )
         }
     }
+    */
 
     fun endGame(onNavigate: () -> Unit) {
         val s = state.value
@@ -174,10 +177,78 @@ class GameViewModel : ViewModel() {
 
         state.update { it.copy(navigating = true) }
 
-        GameRepository.games.add(GameResult(s.userInput, s.clears))
+        //GameRepository.games.add(GameResult(s.userInput, s.clears))
+        GameRepository.games.add(GameResult(s.userInput))
 
         startGame(withCountdown = false)
         onNavigate()
+    }
+
+    //NEED TO BE DONE:
+
+    fun onBackPressed(
+        navigateResults: () -> Unit
+    ) {
+        val s = state.value
+
+        if (!s.gameStarted) {
+            navigateResults()
+            return
+        }
+
+        if (!s.gameOver) {
+            finishGame()
+        }
+
+        navigateResults()
+    }
+    /*
+    fun onBackPressed(onNavigateBack: () -> Unit) {
+        val s = state.value
+
+        if (!s.gameStarted) {
+            onNavigateBack()
+            return
+        }
+
+        if (s.gameOver) {
+            saveCurrentGame()
+            onNavigateBack()
+            return
+        }
+
+        finishGame()
+        onNavigateBack()
+    }
+    */
+
+    private fun finishGame() {
+        val s = state.value
+
+        /*
+        saveGame(
+            sequence = s.sequence,
+            errorIndex = s.userIndex
+        )
+        */
+
+        state.update {
+            it.copy(
+                locked = true,
+                gameOver = true
+            )
+        }
+    }
+
+    private fun saveCurrentGame() {
+        val s = state.value
+
+        /*
+        saveGame(
+            sequence = s.sequence,
+            errorIndex = s.userIndex
+        )
+        */
     }
 
 }

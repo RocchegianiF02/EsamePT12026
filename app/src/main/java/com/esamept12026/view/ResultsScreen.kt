@@ -35,10 +35,12 @@ fun ResultsHeader(modifier: Modifier) {
             text = stringResource(R.string.sequence_pressed),
             modifier = Modifier.weight(2f)
         )
+        /*
         Text(
             text = stringResource(R.string.clears),
             modifier = Modifier.weight(1f)
         )
+        */
     }
 }
 
@@ -77,11 +79,13 @@ fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+                /*
                 //Colonna 3 - reset dei pulsanti premuti eseguiti
                 Text(
                     text = "${g.clears}",
                     modifier = Modifier.weight(1f)
                 )
+                */
             }
         }
     }
@@ -89,14 +93,20 @@ fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
 
 //Componente che implementa i bottoni della "Schermata 2" e le relative funzionalità.
 @Composable
-fun ResultsButtons(onClickShowDialog : (Boolean) -> Unit, navController : NavController, modifier: Modifier) {
+fun ResultsButtons(
+    //onClickShowDialog : (Boolean) -> Unit,
+    navController : NavController,
+    modifier: Modifier
+) {
     Button(
-        onClick = { onClickShowDialog(true) },
+        //onClick = { onClickShowDialog(true) },
+        onClick = { navController.navigate("game") },
         modifier = modifier
     ) {
         Text(stringResource(R.string.new_game))
     }
 
+    /*
     Button(
         onClick = {
             navController.navigate("menu") {
@@ -107,6 +117,7 @@ fun ResultsButtons(onClickShowDialog : (Boolean) -> Unit, navController : NavCon
     ) {
         Text(stringResource(R.string.menu))
     }
+    */
 }
 
 //Componente che implementa il riquadro che indica al giocatore che non sono ancora state avviate partite nella sessione corrente.
@@ -123,6 +134,7 @@ fun ResultsNoGamesBox(modifier: Modifier) {
     }
 }
 
+/*
 //Componente che implementa la finestra di dialogo che permette di iniziare una nuova partita.
 @Composable
 fun ResultsDialog(onClickShowDialog : (Boolean) -> Unit, navController: NavController) {
@@ -146,18 +158,21 @@ fun ResultsDialog(onClickShowDialog : (Boolean) -> Unit, navController: NavContr
         }
     )
 }
+*/
 
 //Componente che implementa l'intera "Schermata 2".
 @Composable
 fun ResultsScreen(navController: NavController) {
 
     val games = GameRepository.games
-    var showDialog by remember { mutableStateOf(false) }
+    //var showDialog by remember { mutableStateOf(false) }
 
+    /*
     //Permette di invocare la finestra di dialogo quando "premo" il tasto "indietro" del dispositivo.
     BackHandler {
         showDialog = true
     }
+    */
 
     if(!games.isEmpty()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -173,7 +188,7 @@ fun ResultsScreen(navController: NavController) {
                 ResultsBody(games, modifier = Modifier.weight(1f))
 
                 ResultsButtons(
-                    onClickShowDialog = { newValue -> showDialog = newValue },
+                    //onClickShowDialog = { newValue -> showDialog = newValue },
                     navController,
                     modifier = Modifier.fillMaxWidth().padding(16.dp)
                 )
@@ -188,13 +203,14 @@ fun ResultsScreen(navController: NavController) {
             )
 
             ResultsButtons(
-                onClickShowDialog = { newValue -> showDialog = newValue },
+                //onClickShowDialog = { newValue -> showDialog = newValue },
                 navController,
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             )
         }
     }
 
+    /*
     //Finestra di dialogo che ci chiede la conferma di iniziare una nuova partita.
     if (showDialog) {
         ResultsDialog(
@@ -202,4 +218,5 @@ fun ResultsScreen(navController: NavController) {
             navController
         )
     }
+    */
 }
