@@ -1,6 +1,7 @@
 package com.esamept12026.viewmodel
 
 import android.util.Log
+import androidx.compose.runtime.snapshotFlow
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,13 +13,20 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 import com.esamept12026.data.GameState
+import com.esamept12026.data.SoundManager
+import com.esamept12026.model.GameRepository
 import com.esamept12026.model.GameResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 
 //Questa classe sarà responsabile della preparazione e la gestione dei dati dentro ai componenti dell'applicazione (in quanto ViewModel).
-class GameViewModel(private val repository: com.esamept12026.model.GameRepository) : ViewModel() {
+class GameViewModel(
+    private val repository: GameRepository,
+    private val soundManager: SoundManager
+) : ViewModel() {
 
     val state = MutableStateFlow(GameState())
     private val colors = GameColors.colors
@@ -34,6 +42,15 @@ class GameViewModel(private val repository: com.esamept12026.model.GameRepositor
     init {
         //Log.d("DATABASE SERVICE","CARICO I RISULTATI ESISTENTI ...")
         loadResults()
+        /*
+        viewModelScope.launch {
+            snapshotFlow { state.value.hasShownSequence to state.value.sequence }
+                .filter { (hasShown, seq) -> !hasShown && seq.isNotEmpty() }
+                .collectLatest {
+                    playSequence()
+                }
+        }
+        */
     }
 
     fun loadResults() {
@@ -82,6 +99,11 @@ class GameViewModel(private val repository: com.esamept12026.model.GameRepositor
         //state.update { it.copy(gameStarted = true) }
     }
 
+    fun resetForNewGame() {
+        playJob?.cancel()
+        state.value = GameState()
+    }
+
     fun pauseGame() {
         state.update { it.copy(gamePaused = true) }
     }
@@ -93,8 +115,14 @@ class GameViewModel(private val repository: com.esamept12026.model.GameRepositor
     fun resetError() {
         viewModelScope.launch {
             delay(500)
-            state.update { it.copy( error = false ) }
+            state.update { it.copy(
+                error = false,
+                locked = false,
+                //navigating = false,
+                //navigateToResults = true,
+            ) }
         }
+        Log.d("DEBUG","STATO // ERROR:  "+state.value.error+" // GAME STARTED: "+state.value.gameStarted+" // GAME PAUSE: "+state.value.gamePaused+" // NAVIGATING: "+state.value.navigating)
     }
 
     fun playSequence() {
@@ -141,6 +169,7 @@ class GameViewModel(private val repository: com.esamept12026.model.GameRepositor
                         delay(100)
                     }
                     state.update { it.copy(highlighted = c) }
+                    soundManager.play(c)
                     delay(400)
                     state.update { it.copy(highlighted = null) }
                     delay(120)
@@ -163,6 +192,8 @@ class GameViewModel(private val repository: com.esamept12026.model.GameRepositor
         //Previene click accidentali da parte dell'utente durante le fasi critiche all'interno della nostra applicazione.
         //if (s.locked || s.showing || s.countdownActive || s.navigating) return
         if (state.value.locked || state.value.showing || state.value.navigating || !state.value.gameStarted || state.value.gamePaused) return
+
+        soundManager.play(color)
 
         //Previene l'assegnazione del valore che dovrebbe essere confrontato in caso di valori NULL.
         val expected = state.value.sequence.getOrNull(state.value.userIndex) ?: return
@@ -200,8 +231,8 @@ class GameViewModel(private val repository: com.esamept12026.model.GameRepositor
             it.copy(
                 locked = true,
                 error = true,
-                navigating = true,
-                navigateToResults = true,
+                //navigating = true,
+                //navigateToResults = true,
                 gameStarted = false
             )
         }
@@ -221,14 +252,14 @@ class GameViewModel(private val repository: com.esamept12026.model.GameRepositor
 
         //if (!state.value.gameStarted || !state.value.hasStartedMatch) {
         if (!state.value.hasStartedMatch) {
-            finishGameNoSave()
             navigateResults()
+            finishGameNoSave()
             return
         }
 
         //Log.i("INFORMAZIONI APP","LA PARTITA CONCLUSA ERA IN CORSO!")
-        finishGameSave()
         navigateResults()
+        finishGameSave()
     }
 
     private fun finishGameNoSave() {
@@ -237,6 +268,7 @@ class GameViewModel(private val repository: com.esamept12026.model.GameRepositor
                 locked = true,
                 gameOver = true,
                 gameStarted = false
+                ,navigating = false
             )
         }
     }
@@ -247,6 +279,7 @@ class GameViewModel(private val repository: com.esamept12026.model.GameRepositor
                 locked = true,
                 gameOver = true,
                 gameStarted = false
+                ,navigating = false
             )
         }
         saveCurrentGame()

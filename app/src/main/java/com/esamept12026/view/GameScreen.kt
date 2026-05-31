@@ -1,6 +1,7 @@
 package com.esamept12026.view
 
 import android.content.res.Configuration
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -9,13 +10,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.lifecycle.viewmodel.compose.viewModel
 
 import com.esamept12026.R
 import com.esamept12026.data.GameState
+import com.esamept12026.data.SoundManager
+import com.esamept12026.model.GameRepository
+import com.esamept12026.model.GameRepositoryHelper
 
 import com.esamept12026.viewmodel.GameViewModel
 
@@ -24,7 +31,8 @@ import com.esamept12026.viewmodel.GameViewModel
 fun GameSequence(vm : GameViewModel) {
     val state by vm.state.collectAsState()
     //LaunchedEffect(state.sequence, state.hasShownSequence, state.countdownActive) {
-    LaunchedEffect(state.sequence, state.hasShownSequence) {
+    //LaunchedEffect(state.sequence, state.hasShownSequence) {
+    if(!state.showing && !state.hasShownSequence) {
         vm.playSequence()
     }
 }
@@ -112,7 +120,7 @@ fun GameActionButtons(state : GameState, vm: GameViewModel, navController: NavCo
                 vm.startGame()
             },
             modifier = Modifier.weight(1f),
-            enabled = !state.gameStarted
+            enabled = !state.gameStarted && !state.locked && !state.navigating
         ) { Text(stringResource(R.string.start_game)) }
 
         Spacer(Modifier.width(8.dp))
@@ -125,7 +133,7 @@ fun GameActionButtons(state : GameState, vm: GameViewModel, navController: NavCo
                     vm.pauseGame()
             },
             modifier = Modifier.weight(1f),
-            enabled = state.gameStarted
+            enabled = state.gameStarted && !state.locked && !state.navigating
         ) {
             if(!state.gamePaused)
                 Text(stringResource(R.string.pause_game))
@@ -156,7 +164,7 @@ fun GameActionButtons(state : GameState, vm: GameViewModel, navController: NavCo
 
             },
             modifier = Modifier.weight(1f),
-            enabled = state.gameStarted
+            enabled = state.gameStarted && !state.locked && !state.navigating
         ) { Text(stringResource(R.string.end_game)) }
     }
 }
@@ -167,9 +175,49 @@ fun GameActionButtons(state : GameState, vm: GameViewModel, navController: NavCo
 @Composable
 fun GameScreen(
     navController: NavController,
-    vm: GameViewModel = viewModel()
+    //vm: GameViewModel = viewModel()
 ) {
+    /*
+    // Otteniamo il contesto e creiamo database + repository
+    val context = LocalContext.current
+    val dbHelper = remember { GameRepositoryHelper(context.applicationContext) }
+    val repository = remember { GameRepository(dbHelper) }
+
+    // ViewModel con factory personalizzata
+    val vm: GameViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return GameViewModel(repository) as T
+            }
+        }
+    )
+    */
+    val context = LocalContext.current
+    val soundManager = remember { SoundManager(context.applicationContext) }
+    val activity = context as ComponentActivity
+
+    val dbHelper = remember { GameRepositoryHelper(context.applicationContext) }
+    val repository = remember { GameRepository(dbHelper) }
+
+    val vm: GameViewModel = viewModel(
+        viewModelStoreOwner = activity,
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return GameViewModel(repository, soundManager) as T
+            }
+        }
+    )
+
     val state by vm.state.collectAsState()
+
+    //Reset dello stato
+    LaunchedEffect(Unit) {
+        if (!state.gameStarted) {
+            vm.resetForNewGame()
+        }
+    }
 
     val isLandscape =
         LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE

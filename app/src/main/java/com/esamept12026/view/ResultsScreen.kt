@@ -1,5 +1,7 @@
 package com.esamept12026.view
 
+import android.util.Log
+import androidx.activity.ComponentActivity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -11,6 +13,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -19,12 +22,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.lifecycle.ViewModelProvider
 
 import com.esamept12026.R
+import com.esamept12026.data.SoundManager
 
-import com.esamept12026.data.GameRepository
+//import com.esamept12026.data.GameRepository
+import com.esamept12026.model.GameRepository
+import com.esamept12026.model.GameRepositoryHelper
 import com.esamept12026.model.GameResult
+import com.esamept12026.viewmodel.GameViewModel
+
 
 //Componente che implementa la "header" della "tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati.
 @Composable
@@ -51,7 +62,11 @@ fun ResultsHeader(modifier: Modifier) {
 
 //Componente che implementa il "corpo" della "tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati.
 @Composable
-fun ResultsBody(navController: NavController, games : SnapshotStateList<GameResult>, modifier : Modifier) {
+fun ResultsBody(navController: NavController,
+                //games : SnapshotStateList<GameResult>,
+                games : List<GameResult>,
+                modifier : Modifier
+) {
     LazyColumn( modifier = modifier ) {
         items(games) { g ->
             //val sequenceText = g.sequence.joinToString(", ")
@@ -81,13 +96,13 @@ fun ResultsBody(navController: NavController, games : SnapshotStateList<GameResu
                 else{  }
                 */
                 val sequenceText = buildColoredSequence(g.sequence,g.errorIndex)
-                    //Colonna 2 - sequenza pulsanti premuti
-                    Text(
-                        text = sequenceText,
-                        modifier = Modifier.weight(2f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                //Colonna 2 - sequenza pulsanti premuti
+                Text(
+                    text = sequenceText,
+                    modifier = Modifier.weight(2f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
@@ -154,6 +169,83 @@ fun ResultsNoGamesBox(modifier: Modifier) {
 @Composable
 fun ResultsScreen(navController: NavController) {
 
+    /*
+    val context = LocalContext.current
+
+    val dbHelper = remember { GameRepositoryHelper(context.applicationContext) }
+    val repository = remember { GameRepository(dbHelper) }
+
+    //Log.d("INFORMAZIONI?","I AM STILL ALIVE!")
+
+    val viewModel: GameViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return GameViewModel(repository) as T
+            }
+        }
+    )
+    */
+
+    val context = LocalContext.current
+    val soundManager = remember { SoundManager(context.applicationContext) }
+    val activity = context as ComponentActivity
+
+    val dbHelper = remember { GameRepositoryHelper(context.applicationContext) }
+    val repository = remember { GameRepository(dbHelper) }
+
+    val viewModel: GameViewModel = viewModel(
+        viewModelStoreOwner = activity,            // ← stessa istanza dell'Activity
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return GameViewModel(repository,soundManager) as T
+            }
+        }
+    )
+
+    //Log.d("INFORMAZIONI?","I AM STILL ALIVE PT2!")
+
+    val games : List<GameResult> by viewModel.results.collectAsState()
+
+    if (games.isNotEmpty()) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ResultsHeader(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            )
+
+            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+
+            ResultsBody(
+                navController = navController,
+                games = games,
+                modifier = Modifier.weight(1f)
+            )
+
+            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+
+            ResultsButtons(
+                navController = navController,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            )
+        }
+    } else {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ResultsNoGamesBox(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            )
+            ResultsButtons(
+                navController = navController,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            )
+        }
+    }
+
+    /*
     val games = GameRepository.games
 
     if(!games.isEmpty()) {
@@ -191,5 +283,6 @@ fun ResultsScreen(navController: NavController) {
             )
         }
     }
+    */
 
 }
