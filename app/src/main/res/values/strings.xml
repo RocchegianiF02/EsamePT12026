@@ -5,13 +5,13 @@
     <string name="welcome_message">Welcome in this awesome application! I hope you have fun! :D</string>
     <string name="results">Results</string>
 
-    <string name="clear">Clear</string>
+    <string name="start_game">Start Game</string>
+    <string name="pause_game">Pause</string>
+    <string name="resume_game">Resume</string>
     <string name="end_game">End Game</string>
     <string name="new_game">New Game</string>
-    <string name="menu">Menu</string>
 
     <string name="exit_game">Exit game?</string>
-    <string name="exit_confirm">Do you want to return to menu?</string>
 
     <string name="start_new_game">Start new game?</string>
 
@@ -19,7 +19,6 @@
     <string name="on_first_fail">Failed at first square!</string>
     <string name="squares_pressed">Squares Pressed</string>
     <string name="sequence_pressed">Sequence Pressed</string>
-    <string name="clears">Clears</string>
 
     <string name="score">Score</string>
 
