@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name" translatable="false">EsamePT12026</string>
+    <string name="app_name" translatable="false">FullEsame2026</string>
 
     <string name="welcome_message">Welcome in this awesome application! I hope you have fun! :D</string>
     <string name="results">Results</string>
