@@ -1,5 +1,6 @@
 package com.esamept12026.view
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.lazy.items
@@ -50,13 +51,16 @@ fun ResultsHeader(modifier: Modifier) {
 
 //Componente che implementa il "corpo" della "tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati.
 @Composable
-fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
+fun ResultsBody(navController: NavController, games : SnapshotStateList<GameResult>, modifier : Modifier) {
     LazyColumn( modifier = modifier ) {
         items(games) { g ->
             //val sequenceText = g.sequence.joinToString(", ")
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable{
+                        navController.navigate("details/${g.id}")
+                    }
                     .padding(12.dp)
             ) {
                 //Colonna 1 - numero elementi
@@ -89,6 +93,7 @@ fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
     }
 }
 
+//Da spostare in "GameViewModel" e da richiamare tramite "vm.buildColoredSequence"
 fun buildColoredSequence(
     sequence: List<String>,
     errorIndex: Int
@@ -162,7 +167,7 @@ fun ResultsScreen(navController: NavController) {
             HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
 
             Column {
-                ResultsBody(games, modifier = Modifier.weight(1f))
+                ResultsBody(navController, games, modifier = Modifier.weight(1f))
 
                 ResultsButtons(
                     //onClickShowDialog = { newValue -> showDialog = newValue },
