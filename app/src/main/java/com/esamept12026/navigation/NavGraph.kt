@@ -5,7 +5,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.*
 
 import com.esamept12026.view.GameScreen
-import com.esamept12026.view.MenuScreen
 import com.esamept12026.view.ResultsScreen
 
 /*
@@ -15,16 +14,8 @@ import com.esamept12026.view.ResultsScreen
 fun NavGraph(navController: NavHostController) {
     NavHost(
         navController = navController,
-        //startDestination = "menu"
         startDestination = "results"
     ) {
-        /*
-        //Menù Principale
-        composable("menu") {
-            MenuScreen(navController)
-        }
-        */
-
         //Schermata di Gioco
         composable("game") {
             GameScreen(navController)
