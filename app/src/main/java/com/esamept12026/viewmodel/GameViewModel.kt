@@ -1,6 +1,11 @@
 package com.esamept12026.viewmodel
 
 import android.util.Log
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -207,6 +212,34 @@ class GameViewModel(
         viewModelScope.launch(NonCancellable) {
             val s = state.value
             add(s.sequence,s.userIndex)
+        }
+    }
+
+    fun buildColoredSequence(
+        sequence: List<String>,
+        errorIndex: Int
+    ): AnnotatedString {
+
+        return buildAnnotatedString {
+
+            sequence.forEachIndexed { index, value ->
+
+                withStyle(
+                    style = SpanStyle(
+                        color =
+                            if (index < errorIndex)
+                                Color.Green
+                            else
+                                Color.Red
+                    )
+                ) {
+                    append(value)
+                }
+
+                if (index < sequence.lastIndex) {
+                    append(", ")
+                }
+            }
         }
     }
 
