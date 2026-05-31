@@ -1,6 +1,5 @@
 package com.esamept12026.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esamept12026.data.GameColors
@@ -36,16 +35,23 @@ class GameViewModel : ViewModel() {
         state.update { it.copy(gamePaused = false) }
     }
 
+    fun resetError() {
+        viewModelScope.launch {
+            delay(500)
+            state.update { it.copy(error = false) }
+        }
+    }
+
     fun playSequence() {
         viewModelScope.launch {
 
-            val current = state.value
+            //val current = state.value
 
-            if (current.sequence.isEmpty() || current.hasShownSequence) return@launch
+            if (state.value.sequence.isEmpty() || state.value.hasShownSequence) return@launch
 
             state.update { it.copy(showing = true) }
 
-            for (c in current.sequence) {
+            for (c in state.value.sequence) {
 
                 while (state.value.gamePaused) {
                     delay(100)
@@ -115,11 +121,13 @@ class GameViewModel : ViewModel() {
                 gameStarted = false
             )
         }
+        /*
         viewModelScope.launch {
             delay(300)
             //GameRepository.games.add(GameResult(state.value.sequence,state.value.userIndex))
             saveCurrentGame()
         }
+        */
     }
 
     /*
@@ -146,14 +154,14 @@ class GameViewModel : ViewModel() {
     fun onBackPressed(
         navigateResults: () -> Unit
     ) {
-        val s = state.value
+        //val s = state.value
 
-        if (!s.gameStarted || !s.hasStartedMatch) {
+        if (!state.value.gameStarted || !state.value.hasStartedMatch) {
             navigateResults()
             return
         }
 
-        Log.i("INFORMAZIONI APP","LA PARTITA CONCLUSA ERA IN CORSO!")
+        //Log.i("INFORMAZIONI APP","LA PARTITA CONCLUSA ERA IN CORSO!")
 
         finishGame()
         navigateResults()
