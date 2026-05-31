@@ -1,6 +1,5 @@
 package com.esamept12026.view
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.lazy.items
@@ -10,9 +9,14 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 
@@ -49,7 +53,7 @@ fun ResultsHeader(modifier: Modifier) {
 fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
     LazyColumn( modifier = modifier ) {
         items(games) { g ->
-            val sequenceText = g.sequence.joinToString(", ")
+            //val sequenceText = g.sequence.joinToString(", ")
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -57,10 +61,10 @@ fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
             ) {
                 //Colonna 1 - numero elementi
                 Text(
-                    text = "${g.sequence.size}",
+                    text = "${g.errorIndex}",
                     modifier = Modifier.weight(1f)
                 )
-
+                /*
                 if(sequenceText.isEmpty()){
                     //Colonna 2 - fallimento al primo pulsante
                     Text(
@@ -70,7 +74,9 @@ fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                else{
+                else{  }
+                */
+                val sequenceText = buildColoredSequence(g.sequence,g.errorIndex)
                     //Colonna 2 - sequenza pulsanti premuti
                     Text(
                         text = sequenceText,
@@ -78,14 +84,34 @@ fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                }
-                /*
-                //Colonna 3 - reset dei pulsanti premuti eseguiti
-                Text(
-                    text = "${g.clears}",
-                    modifier = Modifier.weight(1f)
+            }
+        }
+    }
+}
+
+fun buildColoredSequence(
+    sequence: List<String>,
+    errorIndex: Int
+): AnnotatedString {
+
+    return buildAnnotatedString {
+
+        sequence.forEachIndexed { index, value ->
+
+            withStyle(
+                style = SpanStyle(
+                    color =
+                        if (index < errorIndex)
+                            Color.Green
+                        else
+                            Color.Red
                 )
-                */
+            ) {
+                append(value)
+            }
+
+            if (index < sequence.lastIndex) {
+                append(", ")
             }
         }
     }
@@ -94,30 +120,15 @@ fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
 //Componente che implementa i bottoni della "Schermata 2" e le relative funzionalità.
 @Composable
 fun ResultsButtons(
-    //onClickShowDialog : (Boolean) -> Unit,
     navController : NavController,
     modifier: Modifier
 ) {
     Button(
-        //onClick = { onClickShowDialog(true) },
         onClick = { navController.navigate("game") },
         modifier = modifier
     ) {
         Text(stringResource(R.string.new_game))
     }
-
-    /*
-    Button(
-        onClick = {
-            navController.navigate("menu") {
-                popUpTo("menu") { inclusive = true }
-            }
-        },
-        modifier = modifier
-    ) {
-        Text(stringResource(R.string.menu))
-    }
-    */
 }
 
 //Componente che implementa il riquadro che indica al giocatore che non sono ancora state avviate partite nella sessione corrente.
@@ -134,45 +145,11 @@ fun ResultsNoGamesBox(modifier: Modifier) {
     }
 }
 
-/*
-//Componente che implementa la finestra di dialogo che permette di iniziare una nuova partita.
-@Composable
-fun ResultsDialog(onClickShowDialog : (Boolean) -> Unit, navController: NavController) {
-    AlertDialog(
-        onDismissRequest = { onClickShowDialog(false) },
-        title = { Text(stringResource(R.string.start_new_game)) },
-        confirmButton = {
-            Button(onClick = {
-                onClickShowDialog(false)
-                navController.navigate("game") {
-                    popUpTo("game") { inclusive = true }
-                }
-            }) {
-                Text(stringResource(R.string.yes))
-            }
-        },
-        dismissButton = {
-            Button(onClick = { onClickShowDialog(false) }) {
-                Text(stringResource(R.string.no))
-            }
-        }
-    )
-}
-*/
-
 //Componente che implementa l'intera "Schermata 2".
 @Composable
 fun ResultsScreen(navController: NavController) {
 
     val games = GameRepository.games
-    //var showDialog by remember { mutableStateOf(false) }
-
-    /*
-    //Permette di invocare la finestra di dialogo quando "premo" il tasto "indietro" del dispositivo.
-    BackHandler {
-        showDialog = true
-    }
-    */
 
     if(!games.isEmpty()) {
         Column(modifier = Modifier.fillMaxSize()) {
@@ -210,13 +187,4 @@ fun ResultsScreen(navController: NavController) {
         }
     }
 
-    /*
-    //Finestra di dialogo che ci chiede la conferma di iniziare una nuova partita.
-    if (showDialog) {
-        ResultsDialog(
-            onClickShowDialog = { newValue -> showDialog = newValue },
-            navController
-        )
-    }
-    */
 }
