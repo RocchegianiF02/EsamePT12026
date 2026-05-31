@@ -64,11 +64,14 @@ fun GameScreenLandscape(
                     .fillMaxHeight(),
                 verticalArrangement = Arrangement.Center
             ) {
-                GameActionButtons(state,vm,navController)
+                Row{
+                    GameActionButtons(state, vm, navController)
+                }
+                Row{
+                    GameTextArea(state)
+                }
             }
         }
-
-        GameTextArea(state)
     }
 }
 
