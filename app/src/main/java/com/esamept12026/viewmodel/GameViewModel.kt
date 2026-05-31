@@ -156,7 +156,8 @@ class GameViewModel : ViewModel() {
     ) {
         //val s = state.value
 
-        if (!state.value.gameStarted || !state.value.hasStartedMatch) {
+        //if (!state.value.gameStarted || !state.value.hasStartedMatch) {
+        if (!state.value.hasStartedMatch) {
             navigateResults()
             return
         }
