@@ -28,5 +28,5 @@ data class GameState(
     val highlighted: String? = null
 ){
     fun isInputEnabled(): Boolean =
-        !locked && !showing && !navigating
+        !locked && !showing && !navigating && gameStarted && !gamePaused && !gameOver
 }
