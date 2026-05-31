@@ -36,7 +36,7 @@ import com.esamept12026.view.components.GameResultsHeader
 
 
 @Composable
-fun DetailsBody(result: GameResult) {
+fun DetailsBody(result: GameResult, viewModel: GameViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -49,7 +49,7 @@ fun DetailsBody(result: GameResult) {
             modifier = Modifier.weight(1f)
         )
         //Colonna 2 - sequenza pulsanti premuti
-        val sequenceText = buildColoredSequence(result.sequence,result.errorIndex)
+        val sequenceText = viewModel.buildColoredSequence(result.sequence,result.errorIndex)
         Text(
             text = sequenceText,
             modifier = Modifier.weight(2f),
@@ -95,7 +95,8 @@ fun DetailsScreen(gameId: Long){
 
         if (result != null) {
             DetailsBody(
-                result = result!!
+                result = result!!,
+                viewModel
             )
         } else {
             Box(

@@ -38,6 +38,7 @@ import com.esamept12026.view.components.GameResultsHeader
 //Componente che implementa il "corpo" della "tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati.
 @Composable
 fun ResultsBody(navController: NavController,
+                viewModel: GameViewModel,
                 games : List<GameResult>,
                 modifier : Modifier
 ) {
@@ -56,7 +57,7 @@ fun ResultsBody(navController: NavController,
                     text = "${g.errorIndex}",
                     modifier = Modifier.weight(1f)
                 )
-                val sequenceText = buildColoredSequence(g.sequence,g.errorIndex)
+                val sequenceText = viewModel.buildColoredSequence(g.sequence,g.errorIndex)
                 //Colonna 2 - sequenza pulsanti premuti
                 Text(
                     text = sequenceText,
@@ -69,6 +70,7 @@ fun ResultsBody(navController: NavController,
     }
 }
 
+/*
 //Da spostare in "GameViewModel" e da richiamare tramite "vm.buildColoredSequence"
 fun buildColoredSequence(
     sequence: List<String>,
@@ -97,6 +99,7 @@ fun buildColoredSequence(
         }
     }
 }
+*/
 
 //Componente che implementa i bottoni della "Schermata 2" e le relative funzionalità.
 @Composable
@@ -160,6 +163,7 @@ fun ResultsScreen(navController: NavController) {
 
             ResultsBody(
                 navController = navController,
+                viewModel,
                 games = games,
                 modifier = Modifier.weight(1f)
             )
