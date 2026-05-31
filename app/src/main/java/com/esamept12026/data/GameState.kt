@@ -1,9 +1,11 @@
 package com.esamept12026.data
 
 /*
-    Classe contenente gli stati utilizzati all'interno dell'applicazione e alcuni campi condivisi come ad esempio la sequenza di input inseriti
-    da parte dell'utente durante la partita (userInput).
-*/
+ *  Classe contenente gli stati utilizzati all'interno dell'applicazione e
+ *  alcuni campi condivisi come ad esempio la sequenza di input inseriti
+ *  da parte dell'utente durante la partita (userInput) o la sequenza attesa
+ *  (sequence).
+ */
 data class GameState(
     val sequence: List<String> = emptyList(),
     val userInput: List<String> = emptyList(),
@@ -18,12 +20,10 @@ data class GameState(
     val showing: Boolean = false,
     val error: Boolean = false,
 
-    //val showExitDialog: Boolean = false,
-
     val hasShownSequence: Boolean = false,
 
     val navigating: Boolean = false,
-    val navigateToResults: Boolean = false,
+    //val navigateToResults: Boolean = false,
 
     val highlighted: String? = null
 ){

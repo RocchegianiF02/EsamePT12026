@@ -1,10 +1,12 @@
-package com.esamept12026.model
+package com.esamept12026.repository
 
 import android.content.ContentValues
 import android.database.Cursor
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
+
+import com.esamept12026.data.GameResult
 
 class GameRepository(private val dbHelper: GameRepositoryHelper) {
 

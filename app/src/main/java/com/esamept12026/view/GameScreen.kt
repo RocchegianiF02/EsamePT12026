@@ -21,8 +21,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.esamept12026.R
 import com.esamept12026.data.GameState
 import com.esamept12026.data.SoundManager
-import com.esamept12026.model.GameRepository
-import com.esamept12026.model.GameRepositoryHelper
+import com.esamept12026.repository.GameRepository
+import com.esamept12026.repository.GameRepositoryHelper
 
 import com.esamept12026.viewmodel.GameViewModel
 
@@ -30,8 +30,6 @@ import com.esamept12026.viewmodel.GameViewModel
 @Composable
 fun GameSequence(vm : GameViewModel) {
     val state by vm.state.collectAsState()
-    //LaunchedEffect(state.sequence, state.hasShownSequence, state.countdownActive) {
-    //LaunchedEffect(state.sequence, state.hasShownSequence) {
     if(!state.showing && !state.hasShownSequence) {
         vm.playSequence()
     }
@@ -145,23 +143,11 @@ fun GameActionButtons(state : GameState, vm: GameViewModel, navController: NavCo
 
         Button(
             onClick = {
-                //vm.endGame()
-                /*
-                vm.endGame {
-                    navController.navigate("results") {
-                        popUpTo("game") {
-                            inclusive = true
-                        }
-                    }
-                }
-                */
-
                 vm.onBackPressed(
                     navigateResults = {
                         navController.popBackStack()
                     }
                 )
-
             },
             modifier = Modifier.weight(1f),
             enabled = state.gameStarted && !state.locked && !state.navigating
@@ -174,25 +160,8 @@ fun GameActionButtons(state : GameState, vm: GameViewModel, navController: NavCo
 //Componente che implementa l'intera "Schermata 1".
 @Composable
 fun GameScreen(
-    navController: NavController,
-    //vm: GameViewModel = viewModel()
+    navController: NavController
 ) {
-    /*
-    // Otteniamo il contesto e creiamo database + repository
-    val context = LocalContext.current
-    val dbHelper = remember { GameRepositoryHelper(context.applicationContext) }
-    val repository = remember { GameRepository(dbHelper) }
-
-    // ViewModel con factory personalizzata
-    val vm: GameViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                @Suppress("UNCHECKED_CAST")
-                return GameViewModel(repository) as T
-            }
-        }
-    )
-    */
     val context = LocalContext.current
     val soundManager = remember { SoundManager(context.applicationContext) }
     val activity = context as ComponentActivity
@@ -232,15 +201,6 @@ fun GameScreen(
             }
         )
 
-        /*
-        vm.endGame {
-            navController.navigate("results") {
-                popUpTo("game") {
-                    inclusive = true
-                }
-            }
-        }
-        */
     }
 
     Box(Modifier.fillMaxSize()) {

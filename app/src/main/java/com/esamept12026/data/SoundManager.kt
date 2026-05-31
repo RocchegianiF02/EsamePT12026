@@ -3,8 +3,13 @@ package com.esamept12026.data
 import android.content.Context
 import android.media.AudioAttributes
 import android.media.SoundPool
+
 import com.esamept12026.R
 
+/*
+ *  Classe che gestisce i suoni emessi durante la pressione di un pulsante o
+ *  durante la visualizzazione della sequenza che l'utente dovrà riprodurre.
+ */
 class SoundManager(context: Context) {
     private val soundPool: SoundPool
     private val soundMap = mutableMapOf<String, Int>()
@@ -31,9 +36,5 @@ class SoundManager(context: Context) {
     fun play(colorCode: String) {
         val soundId = soundMap[colorCode] ?: return
         soundPool.play(soundId, 1f, 1f, 1, 0, 1f)
-    }
-
-    fun release() {
-        soundPool.release()
     }
 }

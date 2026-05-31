@@ -1,4 +1,4 @@
-package com.esamept12026.model
+package com.esamept12026.repository
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase

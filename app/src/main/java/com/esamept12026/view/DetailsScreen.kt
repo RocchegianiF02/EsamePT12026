@@ -17,49 +17,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.lifecycle.ViewModelProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 
-import com.esamept12026.R
 import com.esamept12026.data.SoundManager
-import com.esamept12026.model.GameRepository
-import com.esamept12026.model.GameRepositoryHelper
-import com.esamept12026.model.GameResult
+import com.esamept12026.repository.GameRepository
+import com.esamept12026.repository.GameRepositoryHelper
+import com.esamept12026.data.GameResult
 import com.esamept12026.viewmodel.GameViewModel
 
-/*
-class DetailsScreen {
-}
-*/
+import com.esamept12026.view.components.GameResultsHeader
 
-//Uguale a "ResultsHeader" in "ResultsScreen" <-- da rendere componenti assestanti
-@Composable
-fun DetailsHeader(modifier: Modifier) {
-    Row(
-        modifier = modifier
-    ) {
-        Text(
-            text = stringResource(R.string.squares_pressed),
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = stringResource(R.string.sequence_pressed),
-            modifier = Modifier.weight(2f)
-        )
-    }
-}
 
-//Simile a "ResultsBody" in "ResultsScreen"
 @Composable
-fun DetailsBody(result: GameResult, modifier: Modifier) {
+fun DetailsBody(result: GameResult) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -71,11 +48,9 @@ fun DetailsBody(result: GameResult, modifier: Modifier) {
             text = "${result.errorIndex}",
             modifier = Modifier.weight(1f)
         )
-        //val sequenceText = buildColoredSequence(g.sequence,g.errorIndex)
         //Colonna 2 - sequenza pulsanti premuti
         val sequenceText = buildColoredSequence(result.sequence,result.errorIndex)
         Text(
-            //text = sequenceText,
             text = sequenceText,
             modifier = Modifier.weight(2f),
             maxLines = 5,
@@ -85,7 +60,7 @@ fun DetailsBody(result: GameResult, modifier: Modifier) {
 }
 
 @Composable
-fun DetailsScreen(navController: NavController, gameId: Long){
+fun DetailsScreen(gameId: Long){
     val context = LocalContext.current
     val soundManager = remember { SoundManager(context.applicationContext) }
     val activity = context as ComponentActivity
@@ -110,7 +85,7 @@ fun DetailsScreen(navController: NavController, gameId: Long){
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        DetailsHeader(
+        GameResultsHeader(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(12.dp)
@@ -120,10 +95,7 @@ fun DetailsScreen(navController: NavController, gameId: Long){
 
         if (result != null) {
             DetailsBody(
-                result = result!!,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(12.dp)
+                result = result!!
             )
         } else {
             Box(
@@ -134,22 +106,4 @@ fun DetailsScreen(navController: NavController, gameId: Long){
             }
         }
     }
-    /*
-    Column(modifier = Modifier.fillMaxSize()) {
-        DetailsHeader(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        )
-
-        HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
-
-        DetailsBody(
-            navController,
-            gameId,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp)
-        )
-    }*/
 }

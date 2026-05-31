@@ -5,14 +5,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.*
 import androidx.navigation.navArgument
-import com.esamept12026.view.DetailsScreen
 
 import com.esamept12026.view.GameScreen
 import com.esamept12026.view.ResultsScreen
+import com.esamept12026.view.DetailsScreen
 
 /*
-    Grafo di navigazione che identifica le differenti routes.
-*/
+ * Classe contente il grafo di navigazione che identifica le differenti routes
+ * all'interno dell'applicazione.
+ */
 @Composable
 fun NavGraph(navController: NavHostController) {
     NavHost(
@@ -36,7 +37,7 @@ fun NavGraph(navController: NavHostController) {
         ) {
             backStackEntry ->
             val gameId = backStackEntry.arguments?.getLong("gameId") ?: return@composable
-            DetailsScreen(navController, gameId = gameId)
+            DetailsScreen(gameId = gameId)
         }
     }
 }
