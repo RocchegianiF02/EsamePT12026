@@ -1,5 +1,7 @@
 package com.esamept12026.viewmodel
 
+import android.util.Log
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esamept12026.data.GameColors
@@ -9,17 +11,70 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-import com.esamept12026.data.GameRepository
 import com.esamept12026.data.GameState
 import com.esamept12026.model.GameResult
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.StateFlow
 
 //Questa classe sarà responsabile della preparazione e la gestione dei dati dentro ai componenti dell'applicazione (in quanto ViewModel).
-class GameViewModel : ViewModel() {
+class GameViewModel(private val repository: com.esamept12026.model.GameRepository) : ViewModel() {
 
     val state = MutableStateFlow(GameState())
     private val colors = GameColors.colors
 
+    private val _results = MutableStateFlow<List<GameResult>>(emptyList())
+    val results: StateFlow<List<GameResult>> = _results
+
+    private var playJob: Job? = null
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //REPOSITORY FUNCTIONS - FIRST TEST
+
+    init {
+        //Log.d("DATABASE SERVICE","CARICO I RISULTATI ESISTENTI ...")
+        loadResults()
+    }
+
+    fun loadResults() {
+        viewModelScope.launch {
+            _results.value = repository.getAll()
+        }
+    }
+
+    fun add(sequence: List<String>, errorIndex: Int) {
+        viewModelScope.launch {
+            repository.inserisci(GameResult(sequence = sequence, errorIndex = errorIndex))
+            loadResults()
+        }
+    }
+
+    /*
+    fun getById(gameId: Long) : GameResult? {
+        var gr : GameResult? = null
+        viewModelScope.launch {
+            gr = repository.getById(gameId)
+        }
+        return gr
+    }
+    */
+
+    suspend fun getById(gameId: Long): GameResult? {
+        return repository.getById(gameId)
+    }
+
+    fun delete(id: Long) {
+        viewModelScope.launch {
+            repository.elimina(id)
+            loadResults()
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
     fun startGame() {
+        if(state.value.gameStarted) return
+        playJob?.cancel()
         state.value = GameState(
             sequence = listOf(colors.random().code),
             gameStarted = true
@@ -38,11 +93,12 @@ class GameViewModel : ViewModel() {
     fun resetError() {
         viewModelScope.launch {
             delay(500)
-            state.update { it.copy(error = false) }
+            state.update { it.copy( error = false ) }
         }
     }
 
     fun playSequence() {
+        /*
         viewModelScope.launch {
 
             //val current = state.value
@@ -69,6 +125,34 @@ class GameViewModel : ViewModel() {
                     showing = false,
                     hasShownSequence = true
                 )
+            }
+        }
+        */
+        playJob?.cancel()
+        playJob = viewModelScope.launch {
+            if (state.value.sequence.isEmpty() || state.value.hasShownSequence) return@launch
+
+            state.update { it.copy(showing = true) }
+
+            try {
+                for (c in state.value.sequence) {
+                    // Attendi se in pausa
+                    while (state.value.gamePaused) {
+                        delay(100)
+                    }
+                    state.update { it.copy(highlighted = c) }
+                    delay(400)
+                    state.update { it.copy(highlighted = null) }
+                    delay(120)
+                }
+            } finally {
+                state.update {
+                    it.copy(
+                        showing = false,
+                        hasShownSequence = true,
+                        highlighted = null
+                    )
+                }
             }
         }
     }
@@ -130,27 +214,6 @@ class GameViewModel : ViewModel() {
         */
     }
 
-    /*
-    fun endGame(
-        onNavigate: () -> Unit
-    ) {
-        val s = state.value
-
-        if (s.locked || s.showing || s.navigating) return
-
-        state.update {
-            it.copy(
-                navigating = true,
-                gameStarted = false,
-                gameOver = true
-            )
-        }
-
-        saveCurrentGame()
-        onNavigate()
-    }
-    */
-
     fun onBackPressed(
         navigateResults: () -> Unit
     ) {
@@ -158,17 +221,27 @@ class GameViewModel : ViewModel() {
 
         //if (!state.value.gameStarted || !state.value.hasStartedMatch) {
         if (!state.value.hasStartedMatch) {
+            finishGameNoSave()
             navigateResults()
             return
         }
 
         //Log.i("INFORMAZIONI APP","LA PARTITA CONCLUSA ERA IN CORSO!")
-
-        finishGame()
+        finishGameSave()
         navigateResults()
     }
 
-    private fun finishGame() {
+    private fun finishGameNoSave() {
+        state.update {
+            it.copy(
+                locked = true,
+                gameOver = true,
+                gameStarted = false
+            )
+        }
+    }
+
+    private fun finishGameSave() {
         state.update {
             it.copy(
                 locked = true,
@@ -180,14 +253,18 @@ class GameViewModel : ViewModel() {
     }
 
     private fun saveCurrentGame() {
-        val s = state.value
-
+        viewModelScope.launch(NonCancellable) {
+            val s = state.value
+            add(s.sequence,s.userIndex)
+        }
+        /*
         GameRepository.games.add(
             GameResult(
                 sequence = s.sequence,
                 errorIndex = s.userIndex
             )
         )
+        */
     }
 
 }
