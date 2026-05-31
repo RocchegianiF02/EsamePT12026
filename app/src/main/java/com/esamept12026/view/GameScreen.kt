@@ -211,6 +211,7 @@ fun GameScreen(
                     .fillMaxSize()
                     .background(Color.Red.copy(alpha = 0.3f))
             )
+            vm.resetError()
         }
     }
 }
