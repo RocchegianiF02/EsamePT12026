@@ -1,87 +1,98 @@
 package com.esamept12026.view
 
-import androidx.activity.compose.BackHandler
+import androidx.activity.ComponentActivity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import androidx.lifecycle.ViewModelProvider
 
 import com.esamept12026.R
+import com.esamept12026.data.SoundManager
 
-import com.esamept12026.data.GameRepository
-import com.esamept12026.model.GameResult
+import com.esamept12026.repository.GameRepository
+import com.esamept12026.repository.GameRepositoryHelper
+import com.esamept12026.data.GameResult
+import com.esamept12026.viewmodel.GameViewModel
 
-//Componente che implementa la "header" della "tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati.
-@Composable
-fun ResultsHeader(modifier: Modifier) {
-    Row(
-        modifier = modifier
-    ) {
-        Text(
-            text = stringResource(R.string.squares_pressed),
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            text = stringResource(R.string.sequence_pressed),
-            modifier = Modifier.weight(2f)
-        )
-        Text(
-            text = stringResource(R.string.clears),
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
+import com.esamept12026.view.components.GameResultsHeader
 
 //Componente che implementa il "corpo" della "tabella" contenente la lista delle partite giocate nella sessione corrente e i relativi risultati.
 @Composable
-fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
+fun ResultsBody(navController: NavController,
+                games : List<GameResult>,
+                modifier : Modifier
+) {
     LazyColumn( modifier = modifier ) {
         items(games) { g ->
-            val sequenceText = g.sequence.joinToString(", ")
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .clickable{
+                        navController.navigate("details/${g.id}")
+                    }
                     .padding(12.dp)
             ) {
                 //Colonna 1 - numero elementi
                 Text(
-                    text = "${g.sequence.size}",
+                    text = "${g.errorIndex}",
                     modifier = Modifier.weight(1f)
                 )
-
-                if(sequenceText.isEmpty()){
-                    //Colonna 2 - fallimento al primo pulsante
-                    Text(
-                        text = stringResource(R.string.on_first_fail),
-                        modifier = Modifier.weight(2f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                else{
-                    //Colonna 2 - sequenza pulsanti premuti
-                    Text(
-                        text = sequenceText,
-                        modifier = Modifier.weight(2f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                //Colonna 3 - reset dei pulsanti premuti eseguiti
+                val sequenceText = buildColoredSequence(g.sequence,g.errorIndex)
+                //Colonna 2 - sequenza pulsanti premuti
                 Text(
-                    text = "${g.clears}",
-                    modifier = Modifier.weight(1f)
+                    text = sequenceText,
+                    modifier = Modifier.weight(2f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
+            }
+        }
+    }
+}
+
+//Da spostare in "GameViewModel" e da richiamare tramite "vm.buildColoredSequence"
+fun buildColoredSequence(
+    sequence: List<String>,
+    errorIndex: Int
+): AnnotatedString {
+
+    return buildAnnotatedString {
+
+        sequence.forEachIndexed { index, value ->
+
+            withStyle(
+                style = SpanStyle(
+                    color =
+                        if (index < errorIndex)
+                            Color.Green
+                        else
+                            Color.Red
+                )
+            ) {
+                append(value)
+            }
+
+            if (index < sequence.lastIndex) {
+                append(", ")
             }
         }
     }
@@ -89,23 +100,15 @@ fun ResultsBody(games : SnapshotStateList<GameResult>, modifier : Modifier) {
 
 //Componente che implementa i bottoni della "Schermata 2" e le relative funzionalità.
 @Composable
-fun ResultsButtons(onClickShowDialog : (Boolean) -> Unit, navController : NavController, modifier: Modifier) {
+fun ResultsButtons(
+    navController : NavController,
+    modifier: Modifier
+) {
     Button(
-        onClick = { onClickShowDialog(true) },
+        onClick = { navController.navigate("game") },
         modifier = modifier
     ) {
         Text(stringResource(R.string.new_game))
-    }
-
-    Button(
-        onClick = {
-            navController.navigate("menu") {
-                popUpTo("menu") { inclusive = true }
-            }
-        },
-        modifier = modifier
-    ) {
-        Text(stringResource(R.string.menu))
     }
 }
 
@@ -123,45 +126,31 @@ fun ResultsNoGamesBox(modifier: Modifier) {
     }
 }
 
-//Componente che implementa la finestra di dialogo che permette di iniziare una nuova partita.
-@Composable
-fun ResultsDialog(onClickShowDialog : (Boolean) -> Unit, navController: NavController) {
-    AlertDialog(
-        onDismissRequest = { onClickShowDialog(false) },
-        title = { Text(stringResource(R.string.start_new_game)) },
-        confirmButton = {
-            Button(onClick = {
-                onClickShowDialog(false)
-                navController.navigate("game") {
-                    popUpTo("game") { inclusive = true }
-                }
-            }) {
-                Text(stringResource(R.string.yes))
-            }
-        },
-        dismissButton = {
-            Button(onClick = { onClickShowDialog(false) }) {
-                Text(stringResource(R.string.no))
-            }
-        }
-    )
-}
-
 //Componente che implementa l'intera "Schermata 2".
 @Composable
 fun ResultsScreen(navController: NavController) {
+    val context = LocalContext.current
+    val soundManager = remember { SoundManager(context.applicationContext) }
+    val activity = context as ComponentActivity
 
-    val games = GameRepository.games
-    var showDialog by remember { mutableStateOf(false) }
+    val dbHelper = remember { GameRepositoryHelper(context.applicationContext) }
+    val repository = remember { GameRepository(dbHelper) }
 
-    //Permette di invocare la finestra di dialogo quando "premo" il tasto "indietro" del dispositivo.
-    BackHandler {
-        showDialog = true
-    }
+    val viewModel: GameViewModel = viewModel(
+        viewModelStoreOwner = activity,            // ← stessa istanza dell'Activity
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                @Suppress("UNCHECKED_CAST")
+                return GameViewModel(repository,soundManager) as T
+            }
+        }
+    )
 
-    if(!games.isEmpty()) {
+    val games : List<GameResult> by viewModel.results.collectAsState()
+
+    if (games.isNotEmpty()) {
         Column(modifier = Modifier.fillMaxSize()) {
-            ResultsHeader(
+            GameResultsHeader(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(12.dp)
@@ -169,37 +158,30 @@ fun ResultsScreen(navController: NavController) {
 
             HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
 
-            Column {
-                ResultsBody(games, modifier = Modifier.weight(1f))
-
-                ResultsButtons(
-                    onClickShowDialog = { newValue -> showDialog = newValue },
-                    navController,
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
-                )
-            }
-        }
-    }
-    else{
-        Column(modifier = Modifier.fillMaxSize()) {
-            ResultsNoGamesBox(modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()
+            ResultsBody(
+                navController = navController,
+                games = games,
+                modifier = Modifier.weight(1f)
             )
 
+            HorizontalDivider(Modifier, DividerDefaults.Thickness, DividerDefaults.color)
+
             ResultsButtons(
-                onClickShowDialog = { newValue -> showDialog = newValue },
-                navController,
+                navController = navController,
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             )
         }
-    }
-
-    //Finestra di dialogo che ci chiede la conferma di iniziare una nuova partita.
-    if (showDialog) {
-        ResultsDialog(
-            onClickShowDialog = { newValue -> showDialog = newValue },
-            navController
-        )
+    } else {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ResultsNoGamesBox(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            )
+            ResultsButtons(
+                navController = navController,
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            )
+        }
     }
 }
