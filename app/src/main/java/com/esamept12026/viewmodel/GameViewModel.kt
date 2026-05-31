@@ -1,5 +1,6 @@
 package com.esamept12026.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.esamept12026.data.GameColors
@@ -17,67 +18,39 @@ import com.esamept12026.model.GameResult
 class GameViewModel : ViewModel() {
 
     val state = MutableStateFlow(GameState())
-    val colors = GameColors.colors
+    private val colors = GameColors.colors
 
-    init {
-        startGame(withCountdown = true)
-    }
-
-    fun startGame(withCountdown: Boolean = true) {
+    fun startGame() {
         state.value = GameState(
             sequence = listOf(colors.random().code),
-            //countdown = 4,
-            //countdownActive = withCountdown
+            gameStarted = true
         )
+        //state.update { it.copy(gameStarted = true) }
     }
 
-    /*
-    fun startCountdown() {
-        if (state.value.isCountingDown) return
-
-        viewModelScope.launch {
-            state.update { it.copy(isCountingDown = true) }
-            while (state.value.countdown > 0) {
-                delay(1000)
-                state.update { it.copy(countdown = it.countdown - 1) }
-            }
-            state.update { it.copy(
-                countdownActive = false,
-                isCountingDown = false
-            )}
-        }
-    }
-    */
-
-    fun startNavigation() {
-        state.update { it.copy(navigating = true) }
+    fun pauseGame() {
+        state.update { it.copy(gamePaused = true) }
     }
 
-    fun resetNavigationEvent() {
-        state.update { it.copy(navigateToResults = false) }
-    }
-
-    fun openExitDialog() {
-        state.update { it.copy(showExitDialog = true) }
-    }
-
-    fun closeExitDialog() {
-        state.update { it.copy(showExitDialog = false) }
+    fun resumeGame() {
+        state.update { it.copy(gamePaused = false) }
     }
 
     fun playSequence() {
         viewModelScope.launch {
+
             val current = state.value
 
-            if (current.sequence.isEmpty() ||
-                current.hasShownSequence
-                //current.hasShownSequence ||
-                //current.countdownActive
-            ) return@launch
+            if (current.sequence.isEmpty() || current.hasShownSequence) return@launch
 
             state.update { it.copy(showing = true) }
 
             for (c in current.sequence) {
+
+                while (state.value.gamePaused) {
+                    delay(100)
+                }
+
                 state.update { it.copy(highlighted = c) }
                 delay(400)
 
@@ -95,19 +68,22 @@ class GameViewModel : ViewModel() {
     }
 
     fun onUserClick(color: String) {
-        val s = state.value
+        //val s = state.value
 
         //Previene click accidentali da parte dell'utente durante le fasi critiche all'interno della nostra applicazione.
         //if (s.locked || s.showing || s.countdownActive || s.navigating) return
-        if (s.locked || s.showing || s.navigating) return
+        if (state.value.locked || state.value.showing || state.value.navigating || !state.value.gameStarted || state.value.gamePaused) return
 
         //Previene l'assegnazione del valore che dovrebbe essere confrontato in caso di valori NULL.
-        val expected = s.sequence.getOrNull(s.userIndex) ?: return
+        val expected = state.value.sequence.getOrNull(state.value.userIndex) ?: return
+
+        if(!state.value.hasStartedMatch)
+            state.update { it.copy(hasStartedMatch = true) }
 
         if (color == expected) {
-            val newIndex = s.userIndex + 1
+            val newIndex = state.value.userIndex + 1
 
-            if (newIndex == s.sequence.size) {
+            if (newIndex == state.value.sequence.size) {
                 state.update {
                     it.copy(
                         sequence = it.sequence + colors.random().code,
@@ -135,120 +111,74 @@ class GameViewModel : ViewModel() {
                 locked = true,
                 error = true,
                 navigating = true,
-                navigateToResults = true
+                navigateToResults = true,
+                gameStarted = false
             )
         }
         viewModelScope.launch {
             delay(300)
-
-            val s = state.value
-            //GameRepository.games.add(GameResult(s.userInput, s.clears))
-            GameRepository.games.add(GameResult(s.userInput))
-
-            //Impedisce il countdown dopo un "Game Over".
-            startGame(withCountdown = false)
+            //GameRepository.games.add(GameResult(state.value.sequence,state.value.userIndex))
+            saveCurrentGame()
         }
     }
 
     /*
-    fun clear() {
+    fun endGame(
+        onNavigate: () -> Unit
+    ) {
         val s = state.value
 
-        //Previene errori di reset non voluti nelle sezioni critiche del codice
-        //if (s.locked || s.showing || s.countdownActive || s.navigating) return
         if (s.locked || s.showing || s.navigating) return
 
         state.update {
             it.copy(
-                userInput = emptyList(),
-                userIndex = 0,
-                clears = it.clears + 1
+                navigating = true,
+                gameStarted = false,
+                gameOver = true
             )
         }
-    }
-    */
 
-    fun endGame(onNavigate: () -> Unit) {
-        val s = state.value
-
-        //Previene errori di reset non voluti nelle sezioni critiche del codice
-        //if (s.locked || s.showing || s.countdownActive || s.navigating) return
-        if (s.locked || s.showing || s.navigating) return
-
-        state.update { it.copy(navigating = true) }
-
-        //GameRepository.games.add(GameResult(s.userInput, s.clears))
-        GameRepository.games.add(GameResult(s.userInput))
-
-        startGame(withCountdown = false)
+        saveCurrentGame()
         onNavigate()
     }
-
-    //NEED TO BE DONE:
+    */
 
     fun onBackPressed(
         navigateResults: () -> Unit
     ) {
         val s = state.value
 
-        if (!s.gameStarted) {
+        if (!s.gameStarted || !s.hasStartedMatch) {
             navigateResults()
             return
         }
 
-        if (!s.gameOver) {
-            finishGame()
-        }
-
-        navigateResults()
-    }
-    /*
-    fun onBackPressed(onNavigateBack: () -> Unit) {
-        val s = state.value
-
-        if (!s.gameStarted) {
-            onNavigateBack()
-            return
-        }
-
-        if (s.gameOver) {
-            saveCurrentGame()
-            onNavigateBack()
-            return
-        }
+        Log.i("INFORMAZIONI APP","LA PARTITA CONCLUSA ERA IN CORSO!")
 
         finishGame()
-        onNavigateBack()
+        navigateResults()
     }
-    */
 
     private fun finishGame() {
-        val s = state.value
-
-        /*
-        saveGame(
-            sequence = s.sequence,
-            errorIndex = s.userIndex
-        )
-        */
-
         state.update {
             it.copy(
                 locked = true,
-                gameOver = true
+                gameOver = true,
+                gameStarted = false
             )
         }
+        saveCurrentGame()
     }
 
     private fun saveCurrentGame() {
         val s = state.value
 
-        /*
-        saveGame(
-            sequence = s.sequence,
-            errorIndex = s.userIndex
+        GameRepository.games.add(
+            GameResult(
+                sequence = s.sequence,
+                errorIndex = s.userIndex
+            )
         )
-        */
     }
 
 }
